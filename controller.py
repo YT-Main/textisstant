@@ -1,10 +1,13 @@
 from flask import Flask, request, jsonify
 from pprint import pprint
-import vonage 
+from weather import *
+import time
+import vonage
 
 app = Flask(__name__)
 
 client = vonage.Client(key='f3798314', secret='TXZnOvVkWorN2Qnt')
+
 
 @app.route('/webhooks/inbound-sms', methods=['GET', 'POST'])
 def inbound_sms():
@@ -17,16 +20,28 @@ def inbound_sms():
         recipient_number = data['msisdn']
         text = data['text']
 
-        send(recipient_number, text)
+        controller(recipient_number)
 
 
     return ('', 204)
+
+def controller(recipient_number):
+  check_weather(recipient_number)
+
+def check_weather(recipient_number):
+  old_val = 0
+  while(True):
+    temp_val = weatherGet()
+    if(temp_val != old_val):
+        send(recipient_number, weather_update())
+        old_val = temp_val
+    time.sleep(5)
 
 def send(recipient_number, text):
     result = client.send_message({
         'from': '12013012405',
         'to': recipient_number,
-    'text': 'You typed: {}'.format(text),
+    'text': '{}'.format(text),
     })
 
 app.run(port=3000)
