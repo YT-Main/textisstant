@@ -3,6 +3,7 @@ from pprint import pprint
 from weather import Weather
 from covid import Covid
 from stocks import Stocks
+from government import Government
 import threading
 import time
 import vonage
@@ -14,8 +15,9 @@ client = vonage.Client(key='f3798314', secret='TXZnOvVkWorN2Qnt')
 weather_instance = Weather()
 covid_instance = Covid()
 stock_instance = Stocks()
+government_instance = Government()
 
-recipient_number = ''
+recipient_number = '14164009651'
 name = "Yash"
 
 @app.route('/webhooks/inbound-sms', methods=['GET', 'POST'])
@@ -56,16 +58,19 @@ def controller(text):
         if('jpy to usd'in text.lower()):
             send(recipient_number, 'Alright, so I have looked it up and the value of JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
     if('watchlist' in text.lower()):
-        send(recipient_number, 'Hey so here is how your watchist is doing \n USD to PHP is' + str(stock_instance.get_data('USD_PHP')) + '\n KRW to USD is' + str(stock_instance.get_data('KRW_USD')) + '\n JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
-    if(('thank you' or 'thanks') in text.lower()):
+        send(recipient_number, 'let me take a look')
+        send(recipient_number, 'here is how your watchist is doing \n USD to PHP is' + str(stock_instance.get_data('USD_PHP')) + '\n KRW to USD is' + str(stock_instance.get_data('KRW_USD')) + '\n JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
+    if('thanks' in text.lower()):
         send(recipient_number, 'Any Time : )')
+    if(('government update') in text.lower()):
+        send(recipient_number, 'Sure let me see')
+        send(recipient_number, is_government_update())
 
 # Stocks
 def load_stock(recipient_number):
     old_porfolio = [['USD_PHP', 0],['KRW_USD', 0],['JPY_USD', 0]]
     while(True):
         old_porfolio = check_stock(old_porfolio)
-        print(old_porfolio)
         time.sleep(3600)
 
 def check_stock(old_porfolio):
@@ -75,7 +80,7 @@ def check_stock(old_porfolio):
         temp_price = stock_instance.get_data(i[0])
         if(i[1] != 0):
             change = (temp_price-i[1])/i[1]
-        if((abs(change) > 0.0005) or (i[1] == 0)):
+        if((abs(change) > 0.00005) or (i[1] == 0)):
             send(recipient_number, 'Hey you might want to check on your posiiton in ' + i[0] + ', the value just shifted to ' + str(temp_price))
             time.sleep(1)
             i[1] = temp_price
@@ -87,7 +92,6 @@ def load_covid(recipient_number):
     old_covid = [0,0]
     while(True):
         old_covid = check_covid(recipient_number, old_covid)
-        print('cvid')
         time.sleep(600)
 
 def check_covid(recipient_number, old_covid):
@@ -125,6 +129,21 @@ def check_weather(recipient_number, old_val):
         send(recipient_number, 'Heads up the temperature in Toronto is currently ' + str(temp_val) + 'degrees')
     return temp_val
 
+# Government
+def load_government(recipient_number):
+    while(True):
+        temp_update = government_instance.get_alert()
+        if(temp_update != 'NULL'):
+            send(recipient_number, 'Yash, here is a urgent government alert that just got sent out: ' + temp_update)
+        time.sleep(600)
+
+def is_government_update():
+    temp_update = government_instance.get_alert()
+    if(temp_update != 'NULL'):
+        return 'There is : ' + temp_update
+    return 'No there is not'
+
+# Send
 def send(recipient_number, text):
     result = client.send_message({
         'from': '12013012405',
@@ -140,6 +159,8 @@ def initialize(recipient_number):
     covid_tread.start()
     stock_tread = threading.Thread(target=load_stock, args=(recipient_number, ))
     stock_tread.start()
+    government_tread = threading.Thread(target=load_government, args=(recipient_number, ))
+    government_tread.start()
 
 app.run(port=3000)
 
