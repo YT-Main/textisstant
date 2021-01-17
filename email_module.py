@@ -64,7 +64,7 @@ class Gmail:
             traceback.print_exc()
             print(str(e))
 
-    def read_latest_emails(self, n_emails_before=100):
+    def read_latest_emails(self, n_emails_before=10):
         try:
             mail = imaplib.IMAP4_SSL(self.SMTP_SERVER)
             mail.login(self.FROM_EMAIL, self.FROM_PWD)
@@ -84,7 +84,10 @@ class Gmail:
                 if mail_content is not None:
                     whitelist_emails.append(mail_content)
 
-            return whitelist_emails
+            if len(whitelist_emails) == 0:
+                return None
+            else:
+                return whitelist_emails[0]
 
         except Exception as e:
             print("Fatal Error")
