@@ -53,6 +53,3 @@ class Reminder:
         else:
             self.user_reminder_data[user_number] = [{'event':event, 'dateTime':dateTime}]
 
-remind = Reminder()
-remind.add_user_event('1234', 'asdf', 70)
-print(remind.alert_topk_recent_events('1234'))
