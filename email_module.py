@@ -53,7 +53,7 @@ class Gmail:
                                 message = str(bytes, encode)
                         email_dict['msg'] = message
 
-                        email_content = email_dict['sender'] + '\n\n' + email_dict['Subject']
+                        email_content = email_dict['sender'] + '\n\n' + email_dict['msg']
 
                         return email_content
                     else:
@@ -80,7 +80,7 @@ class Gmail:
             whitelist_emails = []
 
             for i in range(latest_email_id, first_email_id, -1):
-                mail_content = self._read_email(mail, i, self.whitelist)
+                mail_content = self._read_email(mail, i)
                 if mail_content is not None:
                     whitelist_emails.append(mail_content)
 
