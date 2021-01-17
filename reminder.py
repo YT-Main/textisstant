@@ -9,7 +9,7 @@ class Reminder:
     def __init__(self):
         self.user_reminder_data = {}
 
-    def alert_topk_recent_events(self, user_number, top_k=3, hours_threshold=None, minutes_threshold=60):
+    def alert_recent_event(self, user_number, hours_threshold=None, minutes_threshold=60):
         '''
         OUTPUT: top_k events sorted in most urgent scheduling. 
         Events is dictionary containing
@@ -36,8 +36,8 @@ class Reminder:
             values = df.values[:top_k]
             urgent_events = {}
             urgent_events['user_number'] = user_number
-            urgent_events['event'] = values[:,0]
-            urgent_events['dateTime'] = values[:,1]
+            urgent_events['event'] = values[0,0]
+            urgent_events['dateTime'] = values[0,1]
 
             return events
         else:
