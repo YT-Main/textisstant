@@ -29,17 +29,16 @@ class Reminder:
         #Localize into UTC timezone in order to normalize all dates into offset aware datetimes, not naive
         df = pd.DataFrame(events)
         df = df.sort_values(by='dateTime')
-        print(df)
-        now = self.utc.localize(datetime.now())
+        now = datetime.now()
 
         time_within_alert = now + timedelta(minutes=minutes_threshold)
         df = df.loc[(now < df['dateTime'])&(df['dateTime']<= time_within_alert)]
         if not df.empty:
             values = df.values[:top_k]
-            events = {}
-            events['summary'] = values[:,0]
-            events['location'] = values[:,1]
-            events['start'] = values[:,2]
+            urgent_events = {}
+            urgent_events['user_number'] = user_number
+            urgent_events['event'] = values[:,0]
+            urgent_events['dateTime'] = values[:,1]
 
             return events
         else:
@@ -48,13 +47,13 @@ class Reminder:
     def get_user_events(self, user_number):
         return self.user_reminder_data[user_number]
 
-    def add_user_event(self, user_number, event, dateTime):
-        dateTime = pd.to_datetime(dateTime)
+    def add_user_event(self, user_number, event, minutes_later):
+        dateTime = datetime.now() + timedelta(minutes=minutes_later)
         if user_number in self.user_reminder_data:
             self.user_reminder_data[user_number].append({'event':event, 'dateTime':dateTime})
         else:
             self.user_reminder_data[user_number] = [{'event':event, 'dateTime':dateTime}]
 
 remind = Reminder()
-remind.add_user_event('1234', 'asdf', '2021-01-19T18:00:00.000-08:00')
-remind.alert_topk_recent_events('1234')
+remind.add_user_event('1234', 'asdf', 70)
+print(remind.alert_topk_recent_events('1234'))
