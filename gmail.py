@@ -4,11 +4,6 @@ import imaplib
 import email
 import traceback
 import configparser
-# -------------------------------------------------
-#
-# Utility to read email from Gmail Using Python
-#
-# ------------------------------------------------
 
 class Gmail:
     def __init__(self):
@@ -97,3 +92,5 @@ class Gmail:
 
     def add_whitelist(self, whitelist_sender):
         self.whitelist.append(whitelist_sender)
+
+# Created By: Younghoon Kim (AKA Brian Kim)

@@ -15,4 +15,5 @@ class Stocks:
 
     # Return Data
     return self.info
-  
+
+# Created By: Yash Trivedi
