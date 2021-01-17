@@ -4,18 +4,24 @@ from weather import Weather
 from covid import Covid
 from stocks import Stocks
 from government import Government
+from search import Search
+from news import News
+from chatbot import witBot
 import threading
 import time
 import vonage
 
 app = Flask(__name__)
 
-client = vonage.Client(key='f3798314', secret='TXZnOvVkWorN2Qnt')
+client = vonage.Client(key='0c4254c4', secret='i7EFdIuz8Zpe4qer')
 
 weather_instance = Weather()
 covid_instance = Covid()
 stock_instance = Stocks()
 government_instance = Government()
+search_instance = Search()
+news_instance = News()
+bot_instnace = witBot()
 
 recipient_number = '14164009651'
 name = "Yash"
@@ -37,34 +43,46 @@ def inbound_sms():
     return ('', 204)
 
 def controller(text):
-    if(text.lower() == 'hey'):
-        send(recipient_number,"Hey, I'm Sophia your new personal assistant. You can text me any time night or day if you need any assistance.")
-        time.sleep(2)
-        send(recipient_number,"Silly me I'm on a new phone oculd you text me your name please?")
-    
-    if('yash' in text.lower()):
-        send(recipient_number, "Hello Yash, I am all set up for you :) You can always ask me for help on how to use me just type in 'help'")
-        time.sleep(2)
-        send(recipient_number, "oh yeah. I almost forgot, here are the start up stats you wanted:")
-        time.sleep(2)
-        initialize(recipient_number)
-    if(text.lower() == 'whats the weather'):
+    understood = bot_instnace.understand(text)
+    print(understood)
+
+    if(understood[0] == 'NULL'):
+        if(text.lower() == 'hey'):
+            send(recipient_number,"Hey, I'm Sophia your new personal assistant. You can text me any time night or day if you need any assistance.")
+            time.sleep(2)
+            send(recipient_number,"Silly me I'm on a new phone oculd you text me your name please?")
+        
+        if('yash' in text.lower()):
+            send(recipient_number, "Hello Yash, I am all set up for you :) You can always ask me for help on how to use me just type in 'help'")
+            time.sleep(2)
+            send(recipient_number, "oh yeah. I almost forgot, here are the start up stats you wanted:")
+            time.sleep(2)
+            initialize(recipient_number)
+
+    if(understood[0] == 'Weather'):
         send(recipient_number, ('Hey Yash, its ' + str(weather_instance.weatherGet()) + ' degrees. ' + temp_message(int(weather_instance.weatherGet()))))
-    if('value' in text.lower()):
-        if('usd to php'in text.lower()):
-            send(recipient_number, 'Alright, so I have looked it up and the value of USD to PHP is' + str(stock_instance.get_data('USD_PHP')))
-        if('krw to usd'in text.lower()):
-            send(recipient_number, 'Alright, so I have looked it up and the value of KRW to USD is' + str(stock_instance.get_data('KRW_USD')))
-        if('jpy to usd'in text.lower()):
-            send(recipient_number, 'Alright, so I have looked it up and the value of JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
-    if('watchlist' in text.lower()):
-        send(recipient_number, 'let me take a look')
-        send(recipient_number, 'here is how your watchist is doing \n USD to PHP is' + str(stock_instance.get_data('USD_PHP')) + '\n KRW to USD is' + str(stock_instance.get_data('KRW_USD')) + '\n JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
-    if('thanks' in text.lower()):
-        send(recipient_number, 'Any Time : )')
-    if(('government update') in text.lower()):
+
+    if(understood[0] == 'Stocks'):
+        if(understood[1]['Ticker'].lower() == 'watchlist'):
+            send(recipient_number, 'let me take a look')
+            send(recipient_number, 'here is how your watchist is doing \n USD to PHP is' + str(stock_instance.get_data('USD_PHP')) + '\n KRW to USD is' + str(stock_instance.get_data('KRW_USD')) + '\n JPY to USD is' + str(stock_instance.get_data('JPY_USD')))
+        else:
+            send(recipient_number, 'Alright, so I have looked it up and the value of USD to PHP is ' + str(stock_instance.get_data(understood[1]['Ticker'])))
+
+    if(understood[0] == 'thanks'):
+        send(recipient_number, 'Any Time :)')
+
+    if(understood[0] == 'government'):
         send(recipient_number, 'Sure let me see')
         send(recipient_number, is_government_update())
+
+    if(understood[0] == 'search'):
+        send(recipient_number, 'let me look it up')
+        time.sleep(3)
+        send(recipient_number, search_instance.search_info(text))
+
+    if(understood[0] == 'news'):
+        send(recipient_number, 'Here you go\nNEWS UPDATE: ' + news_update())
 
 # Stocks
 def load_stock(recipient_number):
@@ -143,10 +161,28 @@ def is_government_update():
         return 'There is : ' + temp_update
     return 'No there is not'
 
+# News
+def load_news(recipient_number):
+    old_news = None
+    while(True):
+        old_news = check_news(recipient_number, old_news)
+        print('weather')
+        time.sleep(60)
+
+def check_news(recipient_number, old_news):
+    temp_news = str(weather_instance.weatherGet())
+    if(old_news != temp_news):
+        send(recipient_number, 'News Update: ' + str(news_instance.get_polished_articles()))
+    return temp_news
+
+def news_update():
+    news = news_instance.get_polished_articles()
+    news_text = news[0]['title']
+    return news_text
 # Send
 def send(recipient_number, text):
     result = client.send_message({
-        'from': '12013012405',
+        'from': '15877603813',
         'to': recipient_number,
     'text': '{}'.format(text),
     })
@@ -161,13 +197,15 @@ def initialize(recipient_number):
     stock_tread.start()
     government_tread = threading.Thread(target=load_government, args=(recipient_number, ))
     government_tread.start()
+    news_tread = threading.Thread(target=load_news, args=(recipient_number, ))
+    news_tread.start()
 
 app.run(port=3000)
 
 
 '''
 Notes in code:
-{'api-key': 'f3798314',
+{'api-key': '0c4254c4',
  'keyword': 'QWER',
  'message-timestamp': '2021-01-14 08:16:04',
  'messageId': '170000029E6BBBFE',
@@ -175,6 +213,6 @@ Notes in code:
  'text': 'Qwer',
  'to': '12013012405',
  'type': 'text'
- 'secret': 'TXZnOvVkWorN2Qnt'}
+ 'secret': 'i7EFdIuz8Zpe4qer'}
 
 '''
