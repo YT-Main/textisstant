@@ -14,7 +14,7 @@ import vonage
 
 app = Flask(__name__)
 
-client = vonage.Client(key='0c4254c4', secret='i7EFdIuz8Zpe4qer')
+client = vonage.Client(key='', secret='')
 
 weather_instance = Weather()
 covid_instance = Covid()
@@ -25,7 +25,7 @@ news_instance = News()
 bot_instnace = witBot()
 mail_instance = Gmail()
 
-recipient_number = '14164009651'
+recipient_number = ''
 name = "Yash"
 
 @app.route('/webhooks/inbound-sms', methods=['GET', 'POST'])
@@ -228,7 +228,7 @@ app.run(port=3000)
 
 '''
 Notes in code:
-{'api-key': '0c4254c4',
+{'api-key': '',
  'keyword': 'QWER',
  'message-timestamp': '2021-01-14 08:16:04',
  'messageId': '170000029E6BBBFE',
@@ -236,6 +236,6 @@ Notes in code:
  'text': 'Qwer',
  'to': '12013012405',
  'type': 'text'
- 'secret': 'i7EFdIuz8Zpe4qer'}
+ 'secret': ''}
 
 '''
