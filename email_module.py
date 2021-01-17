@@ -17,13 +17,14 @@ class Gmail:
         self.FROM_PWD = "HacktheNorth2021"
         self.SMTP_SERVER = "imap.gmail.com"
         self.SMTP_PORT = 993
+        self.whitelist = []
 
     def find_encoding_info(self, txt):
         info = email.header.decode_header(txt)
         s, encoding = info[0]
         return s, encoding
 
-    def _read_email(self, mail, email_id, whitelist):
+    def _read_email(self, mail, email_id):
         try:
             data = mail.fetch(str(email_id), '(RFC822)')
             for response_part in data:
@@ -31,7 +32,7 @@ class Gmail:
                 if isinstance(arr, tuple):
                     email_message = email.message_from_string(str(arr[1],'utf-8'))
                     sender = email_message['From']
-                    if any(address in sender for address in whitelist):
+                    if any(address in sender for address in self.whitelist):
                         email_dict = {}
                         email_dict['sender'] = email_message['From']
                         email_dict['date'] = email_message['Date']
@@ -62,7 +63,7 @@ class Gmail:
             traceback.print_exc()
             print(str(e))
 
-    def read_latest_emails(self, whitelist, n_emails_before=100):
+    def read_latest_emails(self, n_emails_before=100):
         try:
             mail = imaplib.IMAP4_SSL(self.SMTP_SERVER)
             mail.login(self.FROM_EMAIL, self.FROM_PWD)
@@ -78,7 +79,7 @@ class Gmail:
             whitelist_emails = []
 
             for i in range(latest_email_id, first_email_id, -1):
-                mail_content = self._read_email(mail, i, whitelist)
+                mail_content = self._read_email(mail, i, self.whitelist)
                 if mail_content is not None:
                     whitelist_emails.append(mail_content)
 
@@ -90,9 +91,6 @@ class Gmail:
             print(str(e))
             return None
 
-
-gmail = Gmail()
-
-emails = gmail.read_latest_emails(['Facebook'])
-# gmail.read_all_email_from_gmail()
+    def add_whitelist(self, whitelist_sender):
+        self.whitelist.append(whitelist_sender)
 
