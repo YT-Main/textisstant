@@ -7,7 +7,6 @@ from phonenumbers import timezone
 
 class Reminder:
     def __init__(self):
-        self.utc=pytz.timezone('Canada/Pacific') #Work on timezone
         self.user_reminder_data = {}
 
     def alert_topk_recent_events(self, user_number, top_k=3, hours_threshold=None, minutes_threshold=60):
