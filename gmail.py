@@ -97,4 +97,3 @@ class Gmail:
 
     def add_whitelist(self, whitelist_sender):
         self.whitelist.append(whitelist_sender)
-

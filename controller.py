@@ -7,13 +7,14 @@ from government import Government
 from search import Search
 from news import News
 from chatbot import witBot
+from gmail import Gmail
 import threading
 import time
 import vonage
 
 app = Flask(__name__)
 
-client = vonage.Client(key='', secret='')
+client = vonage.Client(key='0c4254c4', secret='i7EFdIuz8Zpe4qer')
 
 weather_instance = Weather()
 covid_instance = Covid()
@@ -22,8 +23,9 @@ government_instance = Government()
 search_instance = Search()
 news_instance = News()
 bot_instnace = witBot()
+mail_instance = Gmail()
 
-recipient_number = ''
+recipient_number = '14164009651'
 name = "Yash"
 
 @app.route('/webhooks/inbound-sms', methods=['GET', 'POST'])
@@ -59,6 +61,9 @@ def controller(text):
             time.sleep(2)
             initialize(recipient_number)
 
+    if(understood[0] == 'Emails'):
+        mail_instance.add_whitelist(understood[1]['wit$email'])
+        send(recipient_number, 'Great! I will look out for emails from ' + understood[1]['wit$email'])
     if(understood[0] == 'Weather'):
         send(recipient_number, ('Hey Yash, its ' + str(weather_instance.weatherGet()) + ' degrees. ' + temp_message(int(weather_instance.weatherGet()))))
 
@@ -153,7 +158,7 @@ def load_government(recipient_number):
         temp_update = government_instance.get_alert()
         if(temp_update != 'NULL'):
             send(recipient_number, 'Yash, here is a urgent government alert that just got sent out: ' + temp_update)
-        time.sleep(600)
+        time.sleep(60)
 
 def is_government_update():
     temp_update = government_instance.get_alert()
@@ -167,10 +172,10 @@ def load_news(recipient_number):
     while(True):
         old_news = check_news(recipient_number, old_news)
         print('weather')
-        time.sleep(60)
+        time.sleep(20)
 
 def check_news(recipient_number, old_news):
-    temp_news = str(weather_instance.weatherGet())
+    temp_news = str(news_instance.get_polished_articles())
     if(old_news != temp_news):
         send(recipient_number, 'News Update: ' + str(news_instance.get_polished_articles()))
     return temp_news
@@ -179,6 +184,22 @@ def news_update():
     news = news_instance.get_polished_articles()
     news_text = news[0]['title']
     return news_text
+
+# Email
+def load_mail(recipient_number):
+    print('sdf')
+    old_mail = None
+    while(True):
+        old_mail = check_mail(recipient_number, old_mail)
+        time.sleep(10)
+
+def check_mail(recipient_number, old_mail):
+    temp_mail = mail_instance.read_latest_emails()
+    if(temp_mail != old_mail):
+        print(temp_mail)
+        send(recipient_number, 'Hey you should probably check this out\n' + temp_mail)
+    return temp_mail
+
 # Send
 def send(recipient_number, text):
     result = client.send_message({
@@ -199,13 +220,15 @@ def initialize(recipient_number):
     government_tread.start()
     news_tread = threading.Thread(target=load_news, args=(recipient_number, ))
     news_tread.start()
+    mail_tread = threading.Thread(target=load_mail, args=(recipient_number, ))
+    mail_tread.start()
 
 app.run(port=3000)
 
 
 '''
 Notes in code:
-{'api-key': '',
+{'api-key': '0c4254c4',
  'keyword': 'QWER',
  'message-timestamp': '2021-01-14 08:16:04',
  'messageId': '170000029E6BBBFE',
@@ -213,6 +236,6 @@ Notes in code:
  'text': 'Qwer',
  'to': '12013012405',
  'type': 'text'
- 'secret': ''}
+ 'secret': 'i7EFdIuz8Zpe4qer'}
 
 '''
