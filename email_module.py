@@ -35,7 +35,6 @@ class Gmail:
                     if any(address in sender for address in self.whitelist):
                         email_dict = {}
                         email_dict['sender'] = email_message['From']
-                        email_dict['date'] = email_message['Date']
 
                         subject, encode = self.find_encoding_info(email_message['Subject'])
 
@@ -54,7 +53,9 @@ class Gmail:
                                 message = str(bytes, encode)
                         email_dict['msg'] = message
 
-                        return email_dict
+                        email_content = email_dict['sender'] + '\n\n' + email_dict['Subject']
+
+                        return email_content
                     else:
                         return None
 
