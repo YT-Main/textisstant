@@ -9,3 +9,5 @@ class Covid:
 
     def covidGet(self):
         return [self.Ontario["infectedCount"], self.Ontario["deceasedCount"]]
+
+# Created By: Yash Trivedi

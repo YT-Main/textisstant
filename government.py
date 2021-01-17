@@ -13,3 +13,4 @@ class Government:
     def get_alert(self):
         return np.random.choice(self.keys, 1, p=self.probabilities)[0]
 
+# Created By: Yash Trivedi

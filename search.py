@@ -18,3 +18,5 @@ class Search:
     self.info = self.data['knowledge_graph']['description']
     # print the JSON response from Scale SERP
     return self.info
+
+# Created By: Yash Trivedi

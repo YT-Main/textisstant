@@ -33,3 +33,5 @@ class News:
             polished_articles.append(polished_article)
 
         return polished_articles
+
+# Created By: Yu Chen + Younghoon Kim (AKA Brian Kim)

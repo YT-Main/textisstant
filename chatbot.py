@@ -1,6 +1,5 @@
 from wit import Wit
 
-
 class witBot():
 
     def __init__(self):
@@ -18,3 +17,5 @@ class witBot():
         for k, v in analysis['entities'].items():
             entity_data.update({v[0]['name']: v[0]['value']})
         return [intent_data, entity_data]
+
+# Written by: Chris Chambers

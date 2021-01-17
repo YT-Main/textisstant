@@ -12,6 +12,9 @@ import threading
 import time
 import vonage
 
+'''
+API key + Secret & phone number temporarily removed for privacy
+'''
 app = Flask(__name__)
 
 client = vonage.Client(key='', secret='')
@@ -64,8 +67,16 @@ def controller(text):
     if(understood[0] == 'Emails'):
         mail_instance.add_whitelist(understood[1]['wit$email'])
         send(recipient_number, 'Great! I will look out for emails from ' + understood[1]['wit$email'])
+   
     if(understood[0] == 'Weather'):
         send(recipient_number, ('Hey Yash, its ' + str(weather_instance.weatherGet()) + ' degrees. ' + temp_message(int(weather_instance.weatherGet()))))
+  
+    if (understood[0] == 'Covid'):
+        temp_val = covid_instance.covidGet()
+        send(recipient_number, 'There are ' + str(temp_val[0]) + ' people infected with COVID-19 in Ontario')
+        time.sleep(1)
+        send(recipient_number, 'Sadly ' + str(temp_val[1]) + ' people have died Ontario from COVID')
+        time.sleep(1)
 
     if(understood[0] == 'Stocks'):
         if(understood[1]['Ticker'].lower() == 'watchlist'):
@@ -226,16 +237,4 @@ def initialize(recipient_number):
 app.run(port=3000)
 
 
-'''
-Notes in code:
-{'api-key': '',
- 'keyword': 'QWER',
- 'message-timestamp': '2021-01-14 08:16:04',
- 'messageId': '170000029E6BBBFE',
- 'msisdn': '821074354789',
- 'text': 'Qwer',
- 'to': '12013012405',
- 'type': 'text'
- 'secret': ''}
-
-'''
+# Created By: Yash Trivedi
